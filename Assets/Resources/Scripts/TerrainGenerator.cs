@@ -17,18 +17,25 @@ public class TerrainGenerator : MonoBehaviour {
 
 		InitializeTerrainTextures ();
 		CreateTerrain ();
-		GenerateMountain ();
-		//GenerateMountain ();
-		//GenerateMountain ();
+		int mountainCount = 8;
+		TerrainData tData = terrainObject.GetComponent<Terrain> ().terrainData;
+		for (int i = 0; i < mountainCount; i++) {
+			float mountainRadius = Random.Range (30.0f, 40.0f);
+			int xCoord = Random.Range ((int)mountainRadius+1,tData.heightmapWidth-(int)mountainRadius-1);
+			int yCoord = Random.Range ((int)mountainRadius+1,tData.heightmapHeight-(int)mountainRadius-1);
+			GenerateMountain (xCoord,yCoord,mountainRadius);
+		}
 	}
 
 	void InitializeTerrainTextures(){
 		
-		terrainTexture = new SplatPrototype[2]; 
+		terrainTexture = new SplatPrototype[3]; 
 		terrainTexture[0] = new SplatPrototype();
 		terrainTexture[0].texture = (Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/GrassHillAlbedo");
 		terrainTexture[1] = new SplatPrototype();
 		terrainTexture[1].texture = (Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/SandAlbedo");
+		terrainTexture[2] = new SplatPrototype();
+		terrainTexture[2].texture = (Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/MudRockyAlbedoSpecular");
 
 	}
 	
@@ -61,7 +68,8 @@ public class TerrainGenerator : MonoBehaviour {
 		tData.SetHeights(0,0,heights);
 
 		float[,,] maps = tData.GetAlphamaps(0, 0, tData.alphamapWidth, tData.alphamapHeight);
-
+		Debug.Log (tData.alphamapWidth);
+		Debug.Log (tData.alphamapHeight);
 		for (int i = 0; i < tData.alphamapWidth; i++) {
 
 			for (int k = tData.alphamapHeight - 1; k > tData.alphamapHeight - 4; k--) {
@@ -92,53 +100,42 @@ public class TerrainGenerator : MonoBehaviour {
 		terrainObject = Terrain.CreateTerrainGameObject(tData);
 	}
 
-	void GenerateMountain(){
+	void GenerateMountain(int xCoord,int yCoord,float mountainRadius){
 
 		TerrainData tData = terrainObject.GetComponent<Terrain> ().terrainData;
 
 		float[,] heights = tData.GetHeights(0,0,tData.heightmapWidth,tData.heightmapHeight);
+		float[,,] maps = tData.GetAlphamaps(0, 0, tData.alphamapWidth, tData.alphamapHeight);
+
+		//float mountainRadius = Random.Range (30.0f, 60.0f);
+		//xCoord = Random.Range ((int)mountainRadius+1,tData.heightmapWidth-(int)mountainRadius-1);
+		//yCoord = Random.Range ((int)mountainRadius+1,tData.heightmapHeight-(int)mountainRadius-1);
 
 
-		int xCoord = Random.Range (30,tData.heightmapWidth-30);
-		int yCoord = Random.Range (30,tData.heightmapHeight-30);
-		Debug.Log (tData.heightmapWidth);
-		Debug.Log (tData.heightmapHeight);
-		Debug.Log (xCoord);
-		Debug.Log (yCoord);
+		float mountainAltitude = Random.Range (terrainHeight/6.0f,terrainHeight/4.0f);
 
-		float mountainAltitude = Random.Range (terrainHeight/3.0f,terrainHeight);
-//		heights [xCoord, yCoord] = (Mathf.Log(mountainAltitude,2)/10.0f);
-//		heights [xCoord-1, yCoord] = (Mathf.Log(mountainAltitude/2,2)/10.0f);
-//		heights [xCoord-2, yCoord] = (Mathf.Log(mountainAltitude/4,2)/10.0f);
-//		heights [xCoord-3, yCoord] = (Mathf.Log(mountainAltitude/8,2)/10.0f);
-//		int mountainSlope = 30;
-//		float maxDistanceSq = mountainSlope*mountainSlope*2; 
-//		for (int i = xCoord - mountainSlope; i < xCoord + mountainSlope; i++) {
-//			for (int j = yCoord - mountainSlope; j < yCoord + mountainSlope; j++) {
-//				float distSq = (xCoord - i) * (xCoord - i) + (yCoord - j) * (yCoord - j);
-//				float distFraction = distSq / maxDistanceSq;
-//				heights [i, j] = 1.0f/Mathf.Exp (distFraction)/Mathf.Exp(1.0f);
-//			}
-//		}
 
-//		for (int i = xCoord; i < xCoord + 50; i++) {
-//			float x = (i-xCoord) / 50.0f;
-//			heights [i, yCoord] = 1.0f-(Mathf.Exp(10*x) - 1.0f)/(Mathf.Exp(10*1) - 1.0f);
-//		}
 
-		float maxDistance = Mathf.Sqrt(30 * 30 * 2);
-		for (int i = xCoord-30; i < xCoord+30; i++) {
-			for (int j = yCoord-30; j < yCoord + 30; j++) {
+		float mrs = mountainRadius * mountainRadius;
+		for (int i = xCoord-(int)mountainRadius; i < xCoord+(int)mountainRadius; i++) {
+			for (int j = yCoord-(int)mountainRadius; j < yCoord + (int)mountainRadius; j++) {
 				float distance = (xCoord - i) * (xCoord - i) + (yCoord - j) * (yCoord - j);
+				if (distance > mrs)
+					continue;
 				distance = Mathf.Sqrt (distance);
-				float val = 1.0f - distance / maxDistance;
+				float val = 1.0f - distance / mountainRadius;
 				val = val * mountainAltitude/terrainHeight+ distanceAboveSeaLevel/terrainHeight;
-				heights[i,j] = val;
+				int sign = Random.Range (-1, 2);
+
+				heights[i,j] = Mathf.Max(heights[i,j],val+ Random.Range(0.001f,0.01f));
+				maps [i, j, 0] = 0.2f;
+				maps [i, j, 1] = 0.0f;
+				maps [i, j, 2] = 0.8f;
 			}
 		}
 
-
 		//Debug.Log (heights [xCoord, yCoord]);
 		tData.SetHeights(0,0,heights);
+		tData.SetAlphamaps (0, 0, maps);
 	}
 }
