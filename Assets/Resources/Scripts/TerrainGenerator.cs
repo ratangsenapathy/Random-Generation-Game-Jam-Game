@@ -17,25 +17,42 @@ public class TerrainGenerator : MonoBehaviour {
 
 		InitializeTerrainTextures ();
 		CreateTerrain ();
-		int mountainCount = 8;
-		TerrainData tData = terrainObject.GetComponent<Terrain> ().terrainData;
-		for (int i = 0; i < mountainCount; i++) {
-			float mountainRadius = Random.Range (30.0f, 40.0f);
-			int xCoord = Random.Range ((int)mountainRadius+1,tData.heightmapWidth-(int)mountainRadius-1);
-			int yCoord = Random.Range ((int)mountainRadius+1,tData.heightmapHeight-(int)mountainRadius-1);
-			GenerateMountain (xCoord,yCoord,mountainRadius);
-		}
+		GenerateMountains (15);
+		GenerateMountains (5);
+		GenerateMountains (6);
+
 	}
 
+	void GenerateMountains(int mountainCount){
+		TerrainData tData = terrainObject.GetComponent<Terrain> ().terrainData;
+		float mountainRadius = Random.Range (30.0f, 40.0f);
+		int xCoord = Random.Range ((int)mountainRadius+1,tData.heightmapWidth-(int)mountainRadius-1);
+		int yCoord = Random.Range ((int)mountainRadius+1,tData.heightmapHeight-(int)mountainRadius-1);
+		for (int i = 0; i < mountainCount; i++) {
+
+			GenerateMountain (xCoord,yCoord,mountainRadius);
+			float newMountainRadius = Random.Range (30.0f, 40.0f);
+			xCoord += (int)Random.Range (mountainRadius * 0.75f, mountainRadius*0.90f);
+			yCoord += (int)Random.Range (mountainRadius * 0.75f, mountainRadius*0.90f);
+			xCoord = Mathf.Clamp (xCoord,(int)newMountainRadius+1,tData.heightmapWidth-(int)newMountainRadius-1);
+			yCoord = Mathf.Clamp (yCoord, (int)newMountainRadius + 1, tData.heightmapHeight - (int)newMountainRadius - 1);
+			mountainRadius = newMountainRadius;
+		}
+	}
 	void InitializeTerrainTextures(){
 		
-		terrainTexture = new SplatPrototype[3]; 
+		terrainTexture = new SplatPrototype[4]; 
 		terrainTexture[0] = new SplatPrototype();
 		terrainTexture[0].texture = (Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/GrassHillAlbedo");
 		terrainTexture[1] = new SplatPrototype();
 		terrainTexture[1].texture = (Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/SandAlbedo");
 		terrainTexture[2] = new SplatPrototype();
 		terrainTexture[2].texture = (Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/MudRockyAlbedoSpecular");
+		terrainTexture[2].normalMap = (Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/MudRockyNormals");
+		terrainTexture[2].tileSize = new Vector2(5.0f,5.0f);
+		terrainTexture[3] = new SplatPrototype();
+		terrainTexture[3].texture = (Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/GrassRockyAlbedo");
+		terrainTexture[3].tileSize = new Vector2(5.0f,5.0f);
 
 	}
 	
@@ -117,20 +134,27 @@ public class TerrainGenerator : MonoBehaviour {
 
 
 		float mrs = mountainRadius * mountainRadius;
+		//float random = Random.Range (0.001f, 0.01f);
 		for (int i = xCoord-(int)mountainRadius; i < xCoord+(int)mountainRadius; i++) {
+			float random = Random.Range (0.001f, 0.01f);
 			for (int j = yCoord-(int)mountainRadius; j < yCoord + (int)mountainRadius; j++) {
 				float distance = (xCoord - i) * (xCoord - i) + (yCoord - j) * (yCoord - j);
 				if (distance > mrs)
 					continue;
 				distance = Mathf.Sqrt (distance);
 				float val = 1.0f - distance / mountainRadius;
+				if (val >= 0.90f)
+					val += Random.Range (0.02f,0.04f);
 				val = val * mountainAltitude/terrainHeight+ distanceAboveSeaLevel/terrainHeight;
-				int sign = Random.Range (-1, 2);
-
-				heights[i,j] = Mathf.Max(heights[i,j],val+ Random.Range(0.001f,0.01f));
-				maps [i, j, 0] = 0.2f;
+				//float random = Random.Range (0.001f, 0.01f);
+//				if((yCoord + (int)mountainRadius)%j<=4)
+//					heights[i,j] = Mathf.Max(heights[i,j],val Random.Range (0.001f, 0.01f));
+//				else
+				heights[i,j] = Mathf.Max(heights[i,j],val+ random);
+				maps [i, j, 0] = 0.0f;
 				maps [i, j, 1] = 0.0f;
-				maps [i, j, 2] = 0.8f;
+				maps [i, j, 2] = 0.95f;
+				maps [i, j, 3] = 0.05f;
 			}
 		}
 
