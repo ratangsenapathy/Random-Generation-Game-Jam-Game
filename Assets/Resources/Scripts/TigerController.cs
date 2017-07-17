@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class TigerController : MonoBehaviour {
 
-	public Transform target;
+	private Transform target;
 	public float speed;
 
 	// Use this for initialization
 	void Start () {
 		
+		target = GameObject.FindGameObjectWithTag ("Player")!=null?GameObject.FindGameObjectWithTag("Player").transform:null;
 	}
 	
 	// Update is called once per frame
@@ -17,7 +18,8 @@ public class TigerController : MonoBehaviour {
 		//Debug.Log (target.position);
 		float step = speed * Time.deltaTime;
 
-		transform.position = Vector3.MoveTowards(transform.position, new Vector3 (target.position.x-0.5f,target.position.y,target.position.z-0.5f), step);
+		if (Vector3.Distance (transform.position, target.position) > 1.0f)
+			transform.position = Vector3.MoveTowards(transform.position, new Vector3 (target.position.x-1.0f,target.position.y,target.position.z-1.0f), step);
 		transform.rotation = Quaternion.identity;
 		transform.LookAt (new Vector3(target.transform.position.x,transform.position.y,target.transform.position.z));
 	}
