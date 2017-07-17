@@ -9,15 +9,18 @@ public class TerrainGenerator : MonoBehaviour {
 	public float terrainLength;
 	public float distanceAboveSeaLevel;
 	public int heightMapResolution;
-
-
 	public GameObject[] trees;
+	public GameObject tiger;
+	public GameObject player;
+
 	private SplatPrototype[] terrainTexture;
 	private TreePrototype[] treePrototypes;
 	private GameObject terrainObject;
 	private List<TreeInstance> treeList;
+	public static int tigerCount;
 	// Use this for initialization
 	void Start () {
+		tigerCount = 0;
 		treeList = new List<TreeInstance> ();
 		InitializeTerrainTextures ();
 		//InitializeTreePrototypes ();
@@ -26,7 +29,9 @@ public class TerrainGenerator : MonoBehaviour {
 		GenerateMountains (50);
 		//GenerateMountains (50);
 		//GenerateMountains (6);
-		GenerateTrees(1500);
+		GenerateTrees(2000);
+		Invoke ("GenerateTigers", 1.0f);
+		//GenerateTigers ();
 	}
 
 	void GenerateMountains(int mountainCount){
@@ -254,6 +259,28 @@ public class TerrainGenerator : MonoBehaviour {
 
 		//Debug.Log (heights [xCoord, yCoord]);
 		tData.SetHeights(0,0,heights);
+
+	}
+
+	void GenerateTigers(){
+
+		if(tigerCount<4){
+			int count = Random.Range (3, 7);
+			for (int i = 0; i < count; i++) {
+				int x = Random.Range (0.0f, 1.0f) <= 0.5f ? Random.Range ((int)(player.transform.position.x - 80), (int)(player.transform.position.x - 50)) : Random.Range ((int)(player.transform.position.x + 50), (int)(player.transform.position.x + 80));
+				int z = Random.Range (0.0f, 1.0f) <= 0.5f ? Random.Range ((int)(player.transform.position.z - 80), (int)(player.transform.position.z - 50)) : Random.Range ((int)(player.transform.position.z + 50), (int)(player.transform.position.z + 80));
+
+				x = Mathf.Clamp (x, 50, 1900);
+				z = Mathf.Clamp (z, 50, 1900);
+				TerrainData tData = terrainObject.GetComponent<Terrain> ().terrainData;
+				float[,] heights = tData.GetHeights (0, 0, tData.heightmapWidth, tData.heightmapHeight);
+				int hz = (int)(tData.heightmapWidth / terrainWidth * z);
+				int hx = (int)(tData.heightmapHeight / terrainLength * x);
+				Instantiate (tiger, new Vector3 (x, heights [hx, hz] * terrainHeight + 0.5f, z), Quaternion.identity);
+				tigerCount++;
+			}
+		}
+		Invoke ("GenerateTigers", 3.0f);
 
 	}
 }

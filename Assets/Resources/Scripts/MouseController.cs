@@ -19,7 +19,7 @@ public class MouseController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (Input.GetMouseButtonDown (0)) {
-			Debug.Log ("Mouse Click");
+			//Debug.Log ("Mouse Click");
 			RaycastHit[] hits;
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 			Debug.DrawRay (ray.origin, ray.direction*2000);
@@ -32,6 +32,8 @@ public class MouseController : MonoBehaviour {
 
 						if (hit.collider.tag == "Creature") {
 							Destroy (hit.collider.gameObject);
+							ScoreManager.score += 10;
+							TerrainGenerator.tigerCount--;
 //							TurtleGenerator.turtleCount--;
 //							ScoreManager.score += 10;
 							break;
