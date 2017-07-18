@@ -14,15 +14,17 @@ public class TerrainGenerator : MonoBehaviour {
 	public GameObject player;
 
 	private SplatPrototype[] terrainTexture;
-	private TreePrototype[] treePrototypes;
+	//private TreePrototype[] treePrototypes;
 	private GameObject terrainObject;
-	private List<TreeInstance> treeList;
+	public Texture2D[] terrainTextures;
+	public Texture2D mountainNormalMap;
+	//private List<TreeInstance> treeList;
 	public static int tigerCount;
 	// Use this for initialization
 	void Start () {
 		tigerCount = 0;
-		treeList = new List<TreeInstance> ();
-		InitializeTerrainTextures ();
+		//treeList = new List<TreeInstance> ();
+ 		InitializeTerrainTextures ();
 		//InitializeTreePrototypes ();
 		CreateTerrain ();
 		//GeneratePond (new Vector3(400.0f,0.0f,400.0f));
@@ -30,8 +32,21 @@ public class TerrainGenerator : MonoBehaviour {
 		//GenerateMountains (50);
 		//GenerateMountains (6);
 		GenerateTrees(2000);
+		PlacePlayer ();
 		Invoke ("GenerateTigers", 1.0f);
 		//GenerateTigers ();
+	}
+
+	void PlacePlayer(){
+		TerrainData tData = terrainObject.GetComponent<Terrain> ().terrainData;
+
+		float[,] heights = tData.GetHeights(0,0,tData.heightmapWidth,tData.heightmapHeight);
+		Debug.Log (tData.heightmapWidth);
+		Debug.Log (tData.heightmapHeight);
+		float x = terrainWidth / 2;
+		float z = terrainLength / 2;
+		float y = heights[(int)tData.heightmapWidth/2,(int)tData.heightmapHeight/2]*terrainHeight+2.0f;
+		player.transform.position = new Vector3 (x,y,z);
 	}
 
 	void GenerateMountains(int mountainCount){
@@ -54,17 +69,17 @@ public class TerrainGenerator : MonoBehaviour {
 		
 		terrainTexture = new SplatPrototype[4]; 
 		terrainTexture[0] = new SplatPrototype();
-		terrainTexture[0].texture = (Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/GrassHillAlbedo");
+		terrainTexture [0].texture = terrainTextures [0];//(Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/GrassHillAlbedo");
 		terrainTexture[0].tileSize = new Vector2(5.0f,5.0f);
 		terrainTexture[1] = new SplatPrototype();
-		terrainTexture[1].texture = (Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/SandAlbedo");
+		terrainTexture[1].texture = terrainTextures[1];//(Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/SandAlbedo");
 		terrainTexture[1].tileSize = new Vector2(5.0f,5.0f);
 		terrainTexture[2] = new SplatPrototype();
-		terrainTexture[2].texture = (Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/MudRockyAlbedoSpecular");
-		terrainTexture[2].normalMap = (Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/MudRockyNormals");
+		terrainTexture[2].texture = terrainTextures[2];//(Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/MudRockyAlbedoSpecular");
+		terrainTexture[2].normalMap = mountainNormalMap;//(Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/MudRockyNormals");
 		terrainTexture[2].tileSize = new Vector2(5.0f,5.0f);
 		terrainTexture[3] = new SplatPrototype();
-		terrainTexture[3].texture = (Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/GrassRockyAlbedo");
+		terrainTexture[3].texture = terrainTextures[3];//(Texture2D)Resources.Load("Standard Assets/Environment/TerrainAssets/SurfaceTextures/GrassRockyAlbedo");
 		terrainTexture[3].tileSize = new Vector2(5.0f,5.0f);
 
 	}
@@ -82,7 +97,7 @@ public class TerrainGenerator : MonoBehaviour {
 		tData.size = new Vector3(terrainWidth,terrainHeight,terrainLength);
 
 		tData.splatPrototypes = terrainTexture;
-		tData.treePrototypes = treePrototypes;
+		//tData.treePrototypes = treePrototypes;
 
 		float[,] heights = tData.GetHeights(0,0,tData.heightmapWidth,tData.heightmapHeight );
 
@@ -263,9 +278,9 @@ public class TerrainGenerator : MonoBehaviour {
 	}
 
 	void GenerateTigers(){
-
-		if(tigerCount<1){
-			int count = 1;//Random.Range (3, 7);
+		int count = 2;//Random.Range (3, 7);
+		if(tigerCount<count){
+			
 			for (int i = 0; i < count; i++) {
 				int x = Random.Range (0.0f, 1.0f) <= 0.5f ? Random.Range ((int)(player.transform.position.x - 80), (int)(player.transform.position.x - 50)) : Random.Range ((int)(player.transform.position.x + 50), (int)(player.transform.position.x + 80));
 				int z = Random.Range (0.0f, 1.0f) <= 0.5f ? Random.Range ((int)(player.transform.position.z - 80), (int)(player.transform.position.z - 50)) : Random.Range ((int)(player.transform.position.z + 50), (int)(player.transform.position.z + 80));
@@ -276,7 +291,7 @@ public class TerrainGenerator : MonoBehaviour {
 				float[,] heights = tData.GetHeights (0, 0, tData.heightmapWidth, tData.heightmapHeight);
 				int hz = (int)(tData.heightmapWidth / terrainWidth * z);
 				int hx = (int)(tData.heightmapHeight / terrainLength * x);
-				Instantiate (tiger, new Vector3 (x, heights [hx, hz] * terrainHeight + 0.5f, z), Quaternion.identity);
+				Instantiate (tiger, new Vector3 (x, heights [hx, hz] * terrainHeight + 1.5f, z), Quaternion.identity);
 				tigerCount++;
 			}
 		}

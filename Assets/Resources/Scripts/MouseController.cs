@@ -1,13 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MouseController : MonoBehaviour {
 
 	public Texture2D crosshairImage;
+	private AudioSource audio;
 	// Use this for initialization
 	void Start () {
-		
+		audio = GetComponent<AudioSource>();
 	}
 
 
@@ -20,6 +22,7 @@ public class MouseController : MonoBehaviour {
 	void Update () {
 		if (Input.GetMouseButtonDown (0)) {
 			//Debug.Log ("Mouse Click");
+			audio.Play();
 			RaycastHit[] hits;
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 			Debug.DrawRay (ray.origin, ray.direction*2000);
@@ -48,6 +51,10 @@ public class MouseController : MonoBehaviour {
 				}
 
 			}
+		}
+
+		if (Input.GetKey(KeyCode.Escape)){
+			SceneManager.LoadScene ("GameOverScene", LoadSceneMode.Single);
 		}
 	}
 }
