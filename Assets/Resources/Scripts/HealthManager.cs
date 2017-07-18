@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class HealthManager : MonoBehaviour {
 
@@ -16,5 +17,8 @@ public class HealthManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		healthBar.size = health>0.0f?health:0.0f;
+		if (health < 0) {
+			SceneManager.LoadScene ("GameOverScene", LoadSceneMode.Single);
+		}
 	}
 }

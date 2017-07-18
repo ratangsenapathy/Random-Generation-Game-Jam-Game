@@ -34,5 +34,9 @@ public class TigerController : MonoBehaviour {
 		{
 			HealthManager.health -= 0.01f;
 		}
+		if (transform.position.y < 1.0f) {
+			TerrainGenerator.tigerCount--;
+			Destroy (this.gameObject);
+		}
 	}
 }
