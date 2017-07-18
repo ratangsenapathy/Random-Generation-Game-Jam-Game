@@ -264,8 +264,8 @@ public class TerrainGenerator : MonoBehaviour {
 
 	void GenerateTigers(){
 
-		if(tigerCount<4){
-			int count = Random.Range (3, 7);
+		if(tigerCount<1){
+			int count = 1;//Random.Range (3, 7);
 			for (int i = 0; i < count; i++) {
 				int x = Random.Range (0.0f, 1.0f) <= 0.5f ? Random.Range ((int)(player.transform.position.x - 80), (int)(player.transform.position.x - 50)) : Random.Range ((int)(player.transform.position.x + 50), (int)(player.transform.position.x + 80));
 				int z = Random.Range (0.0f, 1.0f) <= 0.5f ? Random.Range ((int)(player.transform.position.z - 80), (int)(player.transform.position.z - 50)) : Random.Range ((int)(player.transform.position.z + 50), (int)(player.transform.position.z + 80));
